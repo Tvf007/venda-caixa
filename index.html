@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR" class="bg-amber-50 text-gray-900">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Caixa Rápido - Padaria</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script>
+    let vendaAtual = [];
+    let historico = [];
+
+    function adicionarProduto(nome, valor) {
+        const qtd = prompt(`Quantidade de ${nome}:`, "1");
+        const quantidade = parseInt(qtd) || 0;
+        if (quantidade > 0) {
+            const existente = vendaAtual.find(item => item.nome === nome && !item.outros);
+            if (existente) {
+                existente.quantidade += quantidade;
+            } else {
+                vendaAtual.push({ nome, valor, quantidade, outros: false });
+            }
+            renderNota();
+        }
+    }
+
+    function adicionarOutro() {
+        const valorStr = document.getElementById("campo-outros").value.replace(",", ".");
+        const valor = parseFloat(valorStr);
+        if (!isNaN(valor)) {
+            vendaAtual.push({ nome: "Outros", valor, quantidade: 1, outros: true });
+            document.getElementById("campo-outros").value = "";
+            renderNota();
+        }
+    }
+
+    function renderNota() {
+        const nota = document.getElementById("nota");
+        nota.innerHTML = "";
+        let total = 0;
+        vendaAtual.forEach(item => {
+            const li = document.createElement("li");
+            const subtotal = item.valor * item.quantidade;
+            total += subtotal;
+            li.textContent = `${item.nome} x${item.quantidade} — R$ ${subtotal.toFixed(2).replace(".", ",")}`;
+            if (item.outros) li.classList.add("italic", "text-sm", "text-gray-600");
+            nota.appendChild(li);
+        });
+        document.getElementById("total").textContent = total.toFixed(2).replace(".", ",");
+        atualizarTroco();
+    }
+
+    function atualizarTroco() {
+        const valorStr = document.getElementById("valor-recebido").value.replace(",", ".");
+        const recebido = parseFloat(valorStr);
+        const total = parseFloat(document.getElementById("total").textContent.replace(",", "."));
+        const trocoEl = document.getElementById("troco");
+        if (!isNaN(recebido)) {
+            const troco = recebido - total;
+            trocoEl.textContent = "R$ " + troco.toFixed(2).replace(".", ",");
+            trocoEl.className = troco >= 0 ? "text-green-700" : "text-red-600";
+        } else {
+            trocoEl.textContent = "Aguardando pagamento";
+            trocoEl.className = "text-gray-500";
+        }
+    }
+
+    function finalizarVenda() {
+        if (vendaAtual.length === 0) return;
+        const data = new Date().toLocaleString();
+        historico.unshift({ id: historico.length + 1, data, itens: [...vendaAtual] });
+        vendaAtual = [];
+        document.getElementById("valor-recebido").value = "";
+        document.getElementById("troco").textContent = "";
+        renderNota();
+        renderHistorico();
+    }
+
+    function renderHistorico() {
+        const hist = document.getElementById("historico");
+        hist.innerHTML = "";
+        historico.forEach(venda => {
+            const div = document.createElement("div");
+            div.classList.add("border-b", "pb-2", "mb-2");
+            div.innerHTML = `<strong>Venda #${venda.id}</strong> - ${venda.data}<ul class="pl-4">` +
+                venda.itens.map(i => `<li>${i.nome} x${i.quantidade} — R$ ${(i.valor * i.quantidade).toFixed(2).replace(".", ",")}</li>`).join("") +
+                "</ul>";
+            hist.appendChild(div);
+        });
+    }
+    </script>
+</head>
+<body class="p-4 max-w-md mx-auto space-y-6">
+    <h1 class="text-2xl font-bold text-center">Caixa Rápido - Padaria</h1>
+    <div class="grid grid-cols-2 gap-2">
+        <button onclick="adicionarProduto('Pão Francês', 0.7)" class="bg-yellow-200 p-4 rounded shadow">Pão Francês</button>
+        <button onclick="adicionarProduto('Pão Doce', 0.7)" class="bg-yellow-200 p-4 rounded shadow">Pão Doce</button>
+        <button onclick="adicionarProduto('Pão Doce Especial', 0.8)" class="bg-yellow-200 p-4 rounded shadow col-span-2">Pão Doce Especial</button>
+    </div>
+    <div>
+        <label class="block">Outros:</label>
+        <input id="campo-outros" class="border p-2 w-full" onkeydown="if(event.key==='Enter') adicionarOutro()" />
+        <button onclick="adicionarOutro()" class="bg-blue-200 mt-2 px-4 py-2 rounded">Adicionar</button>
+    </div>
+    <div>
+        <h2 class="text-lg font-semibold">Nota:</h2>
+        <ul id="nota" class="space-y-1 text-sm"></ul>
+        <div class="mt-2">Total: R$ <span id="total">0,00</span></div>
+    </div>
+    <div>
+        <label class="block">Valor Recebido:</label>
+        <input id="valor-recebido" class="border p-2 w-full" oninput="atualizarTroco()" />
+        <div class="mt-2">Troco: <span id="troco" class="text-gray-500">Aguardando pagamento</span></div>
+    </div>
+    <button onclick="finalizarVenda()" class="bg-green-500 text-white w-full py-3 rounded shadow">Finalizar Venda</button>
+    <div>
+        <h2 class="text-lg font-semibold mt-4">Histórico de Vendas:</h2>
+        <div id="historico" class="text-sm space-y-2 mt-2"></div>
+    </div>
+</body>
+</html>
