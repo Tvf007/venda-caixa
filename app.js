@@ -1,56 +1,70 @@
+let nota = [];
+let total = 0;
 
-let vendaAtual = [];
-
-function adicionarProduto(nome, preco) {
-    const itemExistente = vendaAtual.find(p => p.nome === nome && p.preco === preco);
-    if (itemExistente) {
-        itemExistente.qtd++;
-    } else {
-        vendaAtual.push({ nome, preco, qtd: 1 });
-    }
-    renderNota();
+function addItem(nome, preco) {
+  nota.push({ nome, preco });
+  atualizarNota();
 }
 
-function adicionarOutro() {
-    const valor = parseFloat(document.getElementById('outroValor').value);
-    if (!isNaN(valor)) {
-        vendaAtual.push({ nome: 'Outros', preco: valor, qtd: 1 });
-        renderNota();
-        document.getElementById('outroValor').value = '';
-    }
+function addOutro() {
+  const valor = parseFloat(document.getElementById('outrosInput').value);
+  if (!isNaN(valor)) {
+    nota.push({ nome: 'Outro', preco: valor });
+    document.getElementById('outrosInput').value = '';
+    atualizarNota();
+  }
 }
 
-function renderNota() {
-    const nota = document.getElementById('notaLista');
-    nota.innerHTML = '';
-    let total = 0;
+function atualizarNota() {
+  const notaAtual = document.getElementById('notaAtual');
+  notaAtual.innerHTML = '';
+  total = 0;
+  nota.forEach((item, i) => {
+    const li = document.createElement('li');
+    li.textContent = `${item.nome} = R$ ${item.preco.toFixed(2)}`;
+    notaAtual.appendChild(li);
+    total += item.preco;
+  });
+  document.getElementById('total').textContent = total.toFixed(2);
+  calcularTroco();
+}
 
-    vendaAtual.forEach((item, index) => {
-        const li = document.createElement('li');
-        li.textContent = \`\${item.nome} x\${item.qtd} = R$ \${(item.qtd * item.preco).toFixed(2)}\`;
-        nota.appendChild(li);
-        total += item.qtd * item.preco;
-    });
-
-    document.getElementById('total').textContent = total.toFixed(2);
+function calcularTroco() {
+  const recebido = parseFloat(document.getElementById('valorRecebido').value) || 0;
+  const troco = recebido - total;
+  const trocoEl = document.getElementById('troco');
+  trocoEl.textContent = 'R$ ' + troco.toFixed(2);
+  trocoEl.className = troco >= 0 ? 'text-green-600' : 'text-red-600';
 }
 
 function finalizarVenda() {
-    const valorRecebido = parseFloat(document.getElementById('valorRecebido').value);
-    const total = vendaAtual.reduce((sum, item) => sum + item.qtd * item.preco, 0);
-    const troco = valorRecebido - total;
-    const trocoEl = document.getElementById('troco');
-    trocoEl.textContent = troco >= 0 ? \`Troco: R$ \${troco.toFixed(2)}\` : '';
+  if (nota.length === 0) return;
+  const dataHora = new Date().toLocaleString();
+  const historico = JSON.parse(localStorage.getItem('vendas') || '[]');
+  historico.unshift({ nota, total, dataHora });
+  localStorage.setItem('vendas', JSON.stringify(historico));
 
-    if (vendaAtual.length > 0) {
-        const historico = document.getElementById('historicoVendas');
-        const li = document.createElement('li');
-        const data = new Date().toLocaleString();
-        li.textContent = \`[\${data}] Total: R$ \${total.toFixed(2)}\`;
-        historico.prepend(li);
-    }
+  nota = [];
+  total = 0;
+  document.getElementById('notaAtual').innerHTML = '';
+  document.getElementById('total').textContent = '0.00';
+  document.getElementById('valorRecebido').value = '';
+  document.getElementById('troco').textContent = 'R$ 0.00';
 
-    vendaAtual = [];
-    renderNota();
-    document.getElementById('valorRecebido').value = '';
+  carregarHistorico();
 }
+
+function carregarHistorico() {
+  const historicoEl = document.getElementById('historico');
+  historicoEl.innerHTML = '';
+  const historico = JSON.parse(localStorage.getItem('vendas') || '[]');
+  historico.forEach((venda, i) => {
+    const li = document.createElement('li');
+    li.className = 'bg-white p-2 rounded shadow text-sm';
+    const itens = venda.nota.map(item => item.nome + ': R$ ' + item.preco.toFixed(2)).join(', ');
+    li.textContent = `${i + 1}. ${venda.dataHora} - Total: R$ ${venda.total.toFixed(2)} | ${itens}`;
+    historicoEl.appendChild(li);
+  });
+}
+
+window.onload = carregarHistorico;
