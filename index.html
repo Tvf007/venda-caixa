@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Caixa Rápido - Padaria</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Caixa Rápido - Padaria</h1>
+
+  <div class="buttons">
+    <button onclick="addItem('Pão Francês', 0.7)">Pão Francês</button>
+    <button onclick="addItem('Pão Doce', 0.7)">Pão Doce</button>
+    <button onclick="addItem('Pão Doce Especial', 0.8)">Pão Doce Especial</button>
+  </div>
+
+  <div class="outros">
+    <label>Outros:</label>
+    <input type="number" id="outroValor" placeholder="Valor R$" />
+    <button onclick="adicionarOutro()">Adicionar</button>
+  </div>
+
+  <div class="nota">
+    <h2>Nota</h2>
+    <div id="notaItens"></div>
+    <p>Total: R$ <span id="total">0.00</span></p>
+    <p>
+      Valor Recebido: <input type="number" id="valorRecebido" oninput="calcularTroco()" />
+    </p>
+    <p>Troco: <span id="troco">Aguardando pagamento</span></p>
+    <button onclick="finalizarVenda()" class="btn-green">Finalizar Venda</button>
+    <button onclick="limparVenda()" class="btn-red">Limpar</button>
+  </div>
+
+  <h2>Histórico de Vendas:</h2>
+  <div id="historico"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
