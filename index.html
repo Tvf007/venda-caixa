@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Caixa Rápido - Padaria</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <h1>Caixa Rápido</h1>
+    <div class="produtos">
+        <button onclick="adicionarProduto('Pão Francês', 0.7)">Pão Francês</button>
+        <button onclick="adicionarProduto('Pão Doce', 0.7)">Pão Doce</button>
+        <button onclick="adicionarProduto('Pão Especial', 0.8)">Pão Especial</button>
+    </div>
+
+    <div class="outros">
+        <label>Outros:</label>
+        <input type="number" id="outroValor" inputmode="decimal" />
+        <button onclick="adicionarOutro()">Adicionar</button>
+    </div>
+
+    <div class="nota">
+        <h2>Nota</h2>
+        <ul id="notaLista"></ul>
+        <p>Total: R$ <span id="total">0.00</span></p>
+    </div>
+
+    <div class="pagamento">
+        <label>Valor Recebido:</label>
+        <input type="number" id="valorRecebido" inputmode="decimal" />
+        <p id="troco"></p>
+        <button onclick="finalizarVenda()">Finalizar Venda</button>
+    </div>
+
+    <div class="historico">
+        <h2>Histórico de Vendas</h2>
+        <ul id="historicoVendas"></ul>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
